@@ -1,0 +1,25 @@
+services:
+  api:
+    build: api/
+    ports:
+      - "8000:80"
+
+  frontend:
+    build: frontend/
+    ports:
+      - "5500:80"
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "3306:3306"
+    environment:  
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: primus
+      MYSQL_USER: primus
+      MYSQL_PASSWORD: primus
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol=tcp"]
+      interval: 5s
+      retries: 10
