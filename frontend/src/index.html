@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,400;0,600;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link href="style.css" rel="stylesheet">
+  <link href="./styles/style.css" rel="stylesheet">
 </head>
 <body>
 
@@ -152,7 +152,18 @@
           <a href="catalogo.html?sort=recent" class="see-all">Ver tudo <i class="bi bi-arrow-right"></i></a>
         </div>
 
-        
+        <!-- Container vazio: o JS injeta aqui os cards (GET /api/products?sort=recent&per_page=4).
+             Estrutura esperada de cada card (classes já estilizadas no style.css):
+             <article class="product-card [is-unavailable]">
+               <span class="badge-tag">Indisponível</span>
+               <a href="produto.html?id=ID" class="product-img"><img ...></a>
+               <div class="product-body">
+                 <h3><a href="produto.html?id=ID">Nome</a></h3>
+                 <p class="price">R$ 0,00</p>
+                 <button class="btn btn-primus btn-add" data-product-id="ID">Adicionar ao carrinho</button>
+               </div>
+             </article> -->
+        <div class="product-row" id="novidadesList"></div>
       </div>
     </section>
   </main>
@@ -160,27 +171,23 @@
   <!-- ============ RODAPÉ ============ -->
   <footer class="footer">
     <div class="container">
-      <div class="row g-4 py-4">
-        <div class="col-12 col-lg-6">
-          <div class="logo mb-2">PRIMUS</div>
-          <p class="mb-0">Construído no treino.<br>Feito para evoluir.</p>
+      <div class="row g-4">
+        <div class="col-6 col-lg-3 footer-item">
+          <i class="bi bi-truck"></i>
+          <div><strong>Entrega para todo o Brasil</strong><small>com rastreamento</small></div>
         </div>
-        <div class="col-6 col-lg-3">
-          <h4>Navegação</h4>
-          <ul class="list-unstyled">
-            <li><a href="catalogo.html">Catálogo</a></li>
-            <li><a href="carrinho.html">Carrinho</a></li>
-            <li><a href="pedidos.html">Meus pedidos</a></li>
-            <li><a href="perfil.html">Perfil</a></li>
-          </ul>
+        <div class="col-6 col-lg-3 footer-item">
+          <i class="bi bi-shield-check"></i>
+          <div><strong>Compra segura</strong><small>Seus dados protegidos</small></div>
         </div>
-        <div class="col-6 col-lg-3">
-          <h4>Sobre o projeto</h4>
-          <p class="text-muted-forj mb-0">Loja de demonstração. O pagamento é simulado e nenhum dado de cartão é solicitado.</p>
+        <div class="col-6 col-lg-3 footer-item">
+          <i class="bi bi-card-heading"></i>
+          <div><strong>Variedade de produtos</strong><small>Roupas, acessórios e equipamentos</small></div>
         </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2026 PRIMUS. Projeto acadêmico.</span>
+        <div class="col-6 col-lg-3 footer-item">
+          <i class="bi bi-tag"></i>
+          <div><strong>Promoções especiais</strong><small>Descontos toda semana</small></div>
+        </div>
       </div>
     </div>
   </footer>
