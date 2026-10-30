@@ -23,3 +23,6 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol=tcp"]
       interval: 5s
       retries: 10
+
+volumes:
+  mysql_data:

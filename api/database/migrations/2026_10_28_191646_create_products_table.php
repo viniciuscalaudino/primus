@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('category_id')
                 ->constrained('categories');
-            $table-> foreignId('cart_id')
-                ->constrained();
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('price',10,2);

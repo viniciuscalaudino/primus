@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('users_id')
+            $table->foreignId('user_id')
                 ->nullable()
                 ->unique()
                 ->constrained()
