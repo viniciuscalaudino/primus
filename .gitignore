@@ -23,3 +23,5 @@
 /api/Homestead.json
 /api/Homestead.yaml
 /api/Thumbs.db
+/api/laravel
+*.sqlite
