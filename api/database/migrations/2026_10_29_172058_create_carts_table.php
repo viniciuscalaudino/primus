@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('carts', function (Blueprint $table) {
@@ -29,9 +26,6 @@ return new class extends Migration
         CHECK ((user_id IS NOT NULL) <> (guest_token IS NOT NULL))');
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('carts');
