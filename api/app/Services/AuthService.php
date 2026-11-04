@@ -3,41 +3,41 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\Request;
+
 
 class AuthService 
 {
-    public function register (array $data): array
+    public function register (array $data, Request $request): User
     {
-        $user = User::create([
-            'name'=>$data['name'], 
-            'email'=>$data['email'], 
-            'password'=>$data['password']    
-        ]);
+        $user = User::create($data);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::guard('web')->login($user);
+        $request->session()->regenerate();
 
-        return ['user' => $user, 'token' => $token];
+        return $user;
     }
 
-    public function login (array $data): array
+    public function login (array $credentials, Request $request): User
     {
-        $user = User::where('email', $data['email'])->first();
-
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        if (! Auth::guard('web')->attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => 'E-mail ou senha incorretos.',
             ]);
         }
 
-        $token = $user->createToken('login_token')->plainTextToken;
+        $request->session()->regenerate();
 
-        return ['user' => $user, 'token' => $token];
+        return Auth::guard('web')->user();
     }
 
-    public function logout (User $user): void
+    public function logout (Request $request): void
     {
-       $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
+       Auth::guard('web')->logout();
+
+       $request->session()->invalidate();
+       $request->session()->regenerateToken();
     }
 }
