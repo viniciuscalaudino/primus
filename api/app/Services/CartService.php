@@ -56,4 +56,17 @@ class CartService
             ['quantity' => $newQuantity],
         );
     }
+
+    public function updateItemQuantity(Cart $cart, int $productId, int $quantity): void
+    {
+        if($quantity < 1){
+            throw ValidationException::withMessages(['quantity' => 'A quantidade mínima é 1.']);
+        }
+
+        if(!$product->active || $product->stock < 1 ){
+            throw ValidationException::withMessages(['product' => 'Produto indisponível.']);
+        }
+
+
+    }
 }
