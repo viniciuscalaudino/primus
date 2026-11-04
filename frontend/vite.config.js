@@ -27,6 +27,13 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    root: 'src',
+    
+    build: {
+      outDir: '../dist',       
+      emptyOutDir: true,
+    },
+
     server: {
       proxy: {
         '/api': apiProxy,

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
@@ -16,8 +15,8 @@ class AuthController extends Controller
     public function register(RegisterRequest $request)
     {
         $user = $this->authService->register(
-            $request->validate(),
-            $request,
+            $request->validated(),
+            $request
         );
 
         return (new UserResource($user))
@@ -28,17 +27,28 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $result = $this->authService->login($request->validated());
+        $user = $this->authService->login(
+            $request->validated(),
+            $request
+            );
 
-        return response()->json($result, 200);
+        return (new UserResource($user))
+            ->response()
+            ->header('Cache-Control', 'no-store');
+    }
+
+
+    public function me(Request $request)
+    {
+        return new UserResource($request->user());
     }
 
     public function logout(Request $request)
     {
         
-        $this->authService->logout($request->user());
+        $this->authService->logout($request);
 
-        return response()->json(['message' => 'Logout realizado.']);
+        return response()->noContent();
     }
 }
 
