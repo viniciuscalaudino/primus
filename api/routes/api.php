@@ -26,5 +26,7 @@ Route::get('products/{id}', [ProductController::class, 'show'])->whereNumber('id
 
 Route::get('/cart', [CartController::class, 'show']);
 
+Route::post('/cart/items', [CartController::class, 'store']);
+
 
 
