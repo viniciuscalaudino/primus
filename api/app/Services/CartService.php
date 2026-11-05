@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Collection;
 
 class CartService
 {
@@ -59,14 +60,73 @@ class CartService
 
     public function updateItemQuantity(Cart $cart, int $productId, int $quantity): void
     {
-        if($quantity < 1){
-            throw ValidationException::withMessages(['quantity' => 'A quantidade mínima é 1.']);
+        if ($productId < 1) {
+        throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
         }
 
-        if(!$product->active || $product->stock < 1 ){
-            throw ValidationException::withMessages(['product' => 'Produto indisponível.']);
+        if($quantity === 0){
+            $cart->items()
+            ->where('product_id', $productId)
+            ->delete();
+
+            return;
+        }
+        elseif($quantity < 0){
+            throw ValidationException::withMessages(['product' => 'Valor informado não aceito.']);   
+        }
+        
+        $item = $cart->items()->where('product_id', $productId)->first();
+    
+        if(!$item){
+             throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
         }
 
+        $product = Product::find($productId);
 
+        if (!$product) {
+            throw ValidationException::withMessages(['product' => 'Produto não encontrado.']);
+        }
+
+        if (!$product->active || $product->stock < $quantity) {
+            throw ValidationException::withMessages(['quantity' => 'Estoque insuficiente ou produto indisponível.']);
+        }
+
+        $item->update([
+            'quantity' => $quantity,
+        ]);
+
+    }
+
+    public function removeItem(Cart $cart, int $productId): void
+    {
+        $item = $cart->items()->where('product_id', $productId)->first();
+    
+        if(!$item){
+             throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
+        }
+
+        $item->delete();
+    }
+
+    public function getCart(Cart $cart): array
+    {
+        $items = $cart->items()
+            ->with('product')
+            ->get();
+        
+        $items = $items->map(function($item) {
+           return [
+            'product_id' => $item->product_id,
+            'name' => $item->product->name,
+            'unit_price' => $item->product->price,
+            'quantity' => $item->quantity,
+            'subtotal' => $item->product->price * $item->quantity
+           ];   
+        });
+
+        return [
+            'items' => $items,
+            'total' => $items->sum('subtotal'),
+        ];
     }
 }
