@@ -73,4 +73,19 @@ class CartController extends Controller
             'cart' => $this->cartService->getCart($cart)
         ], 200);
     }
+
+    public function destroy(Request $request, int $productId)
+    {
+        $user = $request->user();
+
+        $guestToken = $request->header('X-Cart-Token');
+
+        $cart = $this->cartService->findCart($user, $guestToken);
+
+        $this->cartService->removeItem($cart, $productId);
+
+        return response()->json([
+            'cart' => $this->cartService->getCart($cart)
+        ], 200);
+    }
 }

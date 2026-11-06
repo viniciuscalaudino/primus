@@ -28,5 +28,7 @@ Route::get('/cart', [CartController::class, 'show']);
 
 Route::post('/cart/items', [CartController::class, 'store']);
 
+Route::delete('/cart/items/{productId}', [CartController::class, 'destroy']);
+
 
 

@@ -118,6 +118,10 @@ class CartService
 
     public function removeItem(Cart $cart, int $productId): void
     {
+        if ($productId < 1) {
+            throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
+        }
+    
         $item = $cart->items()->where('product_id', $productId)->first();
     
         if(!$item){
