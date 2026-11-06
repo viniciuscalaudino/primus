@@ -23,14 +23,33 @@ class CartService
 
         if($guestToken !== null){
             $cart = Cart::where('guest_token', $guestToken)->first();
-            if($cart !== null){
-                return $cart;
-            }  
+            
+            if($cart === null){
+                throw ValidationException::withMessages(['cart' => 'Carrinho não encontrado.']);
+            }
+
+            return $cart;
         }
 
         return Cart::create([
             'guest_token' => (string) Str::uuid(),
         ]);
+    }
+
+    public function findCart(?User $user, ?string $guestToken): Cart
+    {
+        if ($user !== null){
+            $cart = Cart::where('user_id', $user->id)->first();
+        }elseif($guestToken !== null){
+            $cart = Cart::where('guest_token', $guestToken)->first();
+        }else{
+            throw ValidationException::withMessages(['cart' => 'Identificação do carrinho não informada.']);
+        }       
+        if($cart === null){
+            throw ValidationException::withMessages(['cart' => 'Carrinho não encontrado.']); 
+        } 
+        
+        return $cart;
     }
 
     public function addItem (Cart $cart, Product $product, int $quantity = 1): CartItem

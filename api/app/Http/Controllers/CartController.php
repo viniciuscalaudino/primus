@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
 use App\Models\User;
 use App\Services\CartService;
 use Illuminate\Http\Request;
@@ -52,5 +53,24 @@ class CartController extends Controller
             'message' => 'Produto adicionado ao carrinho com sucesso.',
             'cart' => $this->cartService->getCart($cart)
         ]);
+    }
+
+    public function update(Request $request, int $productId)
+    {
+        $validated = $request->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        $guestToken = $request->header('X-Cart-Token');
+
+        $cart = $this->cartService->findCart($user, $guestToken);
+
+        $this->cartService->updateItemQuantity($cart, $productId, $validated['quantity']);
+
+        return response()->json([
+            'cart' => $this->cartService->getCart($cart)
+        ], 200);
     }
 }
