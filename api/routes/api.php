@@ -28,6 +28,8 @@ Route::get('/cart', [CartController::class, 'show']);
 
 Route::post('/cart/items', [CartController::class, 'store']);
 
+Route::put('/cart/items/{productId}', [CartController::class, 'update']);
+
 Route::delete('/cart/items/{productId}', [CartController::class, 'destroy']);
 
 
