@@ -49,10 +49,10 @@ class CartController extends Controller
         $this->cartService->addItem($cart, $product, $validated['quantity']);
         
         return response()->json([
-            'status' => 201,
             'message' => 'Produto adicionado ao carrinho com sucesso.',
+            'cart_token' => $cart->guest_token,
             'cart' => $this->cartService->getCart($cart)
-        ]);
+        ], 201);
     }
 
     public function update(Request $request, int $productId)

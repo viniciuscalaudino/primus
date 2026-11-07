@@ -123,13 +123,15 @@ class CartService
         });
     }
 
-    public function mergeGuestCart(User $user, string $guestToken): void
+    public function mergeGuestCart(User $user, string $guestToken): array
     {
-        DB::transaction(function () use ($user, $guestToken){
-            $guestCart = Cart::where('guest_token', $guestToken)->with('items.product')->first();
+        return DB::transaction(function () use ($user, $guestToken){
+            $warnings = [];
+
+            $guestCart = Cart::where('guest_token', $guestToken)->with('items')->first();
 
             if (!$guestCart){
-                throw ValidationException::withMessages(['cart' => 'Carrinho de visitante não encontrado.']);
+                return ['products' => []];
             }
 
             $cartUser = Cart::firstOrCreate(['user_id' => $user->id]);
@@ -138,6 +140,10 @@ class CartService
                 $product = Product::where('id', $item->product_id)->lockForUpdate()->firstOrFail();
                 
                 if($product->stock < 1 || !$product->active){
+                    $warnings['products'][] = [
+                        'product_id' => $item->product_id,
+                        'message' => $product->name .': Produto indisponível ou fora de estoque.'
+                        ];
                     continue;
                 }
 
@@ -151,8 +157,17 @@ class CartService
                     ['quantity' => $finalQuantity]
                 );
 
+                if ($newQuantity > $product->stock) {
+                    $warnings['products'][] = [
+                        'product_id' => $item->product_id,
+                        'message' => $product->name . ': estoque insuficiente para a quantidade desejada. Quantidade ajustada.'
+                    ];
+                }
+
             }
             $guestCart->delete();
+
+            return ['products' => $warnings['products'] ?? []];
         });
     }
 

@@ -2,35 +2,44 @@
 
 namespace App\Services;
 
-use App\Models\Cart;
-use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
 
 class AuthService 
 {
     public function __construct(private CartService $cartService) {}
 
-    public function register (array $data, Request $request): User
+    public function register (array $data, Request $request): array
     {
         $user = User::create($data);
+
+        $user->refresh();
 
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
 
-        return $user;
+        $guestToken = $request->header('X-Cart-Token');
+
+        $warnings = $this->mergeCartIfPresent($user, $guestToken);
+
+        return ['user' => $user, 'cart_warnings' => $warnings];
     }
 
-    public function login (array $credentials, Request $request): User
+    private function mergeCartIfPresent(User $user,  ?string $guestToken): array
+    {
+        if(!$guestToken){
+            return ['products' => []];
+        }
+
+        return $this->cartService->mergeGuestCart($user, $guestToken);
+    }
+
+    public function login (array $credentials, Request $request): array
     {
         if (! Auth::guard('web')->attempt($credentials)) {
-            throw ValidationException::withMessages([
-                'email' => 'E-mail ou senha incorretos.',
-            ]);
+            throw ValidationException::withMessages(['email' => 'E-mail ou senha incorretos.',]);
         }
 
         $request->session()->regenerate();
@@ -39,17 +48,9 @@ class AuthService
 
         $guestToken = $request->header('X-Cart-Token');
 
-        if($guestToken === null){
-            return $user;
-        }
+        $warnings = $this->mergeCartIfPresent($user, $guestToken);
 
-        $guestCart = $this->cartService->findGuestCart($guestToken);
-
-        if($guestCart !== null){
-            $this->cartService->mergeGuestCart($user, $guestToken);
-        }
-
-        return $user;
+        return ['user' => $user, 'cart_warnings' => $warnings];
     }
 
     public function logout (Request $request): void
