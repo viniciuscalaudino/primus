@@ -53,6 +53,11 @@ class CartService
         return $cart;
     }
 
+    public function findGuestCart(string $guestToken): ?Cart
+    {
+        return Cart::where('guest_token', $guestToken)->first();
+    }
+
     public function addItem (Cart $cart, Product $product, int $quantity = 1): CartItem
     {
         return  DB::transaction(function() use ($cart, $product, $quantity){
@@ -115,6 +120,39 @@ class CartService
             $item->update([
                 'quantity' => $quantity,
             ]); 
+        });
+    }
+
+    public function mergeGuestCart(User $user, string $guestToken): void
+    {
+        DB::transaction(function () use ($user, $guestToken){
+            $guestCart = Cart::where('guest_token', $guestToken)->with('items.product')->first();
+
+            if (!$guestCart){
+                throw ValidationException::withMessages(['cart' => 'Carrinho de visitante não encontrado.']);
+            }
+
+            $cartUser = Cart::firstOrCreate(['user_id' => $user->id]);
+
+            foreach($guestCart->items as $item){
+                $product = Product::where('id', $item->product_id)->lockForUpdate()->firstOrFail();
+                
+                if($product->stock < 1 || !$product->active){
+                    continue;
+                }
+
+                $currentQuantity = $cartUser->items()->where('product_id', $item->product_id)->first()?->quantity ?? 0;
+                $newQuantity = $currentQuantity + $item->quantity;
+
+                $finalQuantity = min($newQuantity, $product->stock);
+
+                $cartUser->items()->updateOrCreate(
+                    ['product_id' => $item->product_id],
+                    ['quantity' => $finalQuantity]
+                );
+
+            }
+            $guestCart->delete();
         });
     }
 

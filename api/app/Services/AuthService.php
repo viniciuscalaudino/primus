@@ -2,14 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\Cart;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 
 class AuthService 
 {
+    public function __construct(private CartService $cartService) {}
+
     public function register (array $data, Request $request): User
     {
         $user = User::create($data);
@@ -30,7 +35,21 @@ class AuthService
 
         $request->session()->regenerate();
 
-        return Auth::guard('web')->user();
+        $user = Auth::guard('web')->user();
+
+        $guestToken = $request->header('X-Cart-Token');
+
+        if($guestToken === null){
+            return $user;
+        }
+
+        $guestCart = $this->cartService->findGuestCart($guestToken);
+
+        if($guestCart !== null){
+            $this->cartService->mergeGuestCart($user, $guestToken);
+        }
+
+        return $user;
     }
 
     public function logout (Request $request): void
