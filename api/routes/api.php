@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AddressController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -14,8 +15,15 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:6,1');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::get('me', [AuthController::class, 'me']);
-        Route::post('logout', [AuthController::class, 'logout']);
+
+        Route::get('auth/me', [AuthController::class, 'me']);
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+
+        Route::prefix('addresses')->group(function () {
+            Route::get('/', [AddressController::class, 'index']);
+            Route::post('/', [AddressController::class, 'store']);
+            Route::patch('/{addressId}/default', [AddressController::class, 'setDefault']);
+        });
     });
 });
 
@@ -31,6 +39,14 @@ Route::post('/cart/items', [CartController::class, 'store']);
 Route::put('/cart/items/{productId}', [CartController::class, 'update']);
 
 Route::delete('/cart/items/{productId}', [CartController::class, 'destroy']);
+
+Route::prefix('addresses')->group(function () {
+    Route::get('/', [AddressController::class, 'index']);
+
+    Route::post('/', [AddressController::class, 'store']);
+
+    Route::patch('/{addressId}/default', [AddressController::class, 'setDefault']);
+});
 
 
 
