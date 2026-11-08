@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -39,6 +40,12 @@ Route::put('/cart/items/{productId}', [CartController::class, 'update']);
 
 Route::delete('/cart/items/{productId}', [CartController::class, 'destroy']);
 
-
+Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
+    Route::post('/', [OrderController::class, 'store']);
+    Route::get('/', [OrderController::class, 'index']);
+    Route::get('/{id}', [OrderController::class, 'show'])->whereNumber('id');
+    Route::post('/{id}/pay', [OrderController::class, 'pay'])->whereNumber('id');
+    Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->whereNumber('id');
+});
 
 
