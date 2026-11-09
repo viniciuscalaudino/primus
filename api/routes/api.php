@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AdminOrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -48,4 +49,14 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
     Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->whereNumber('id');
 });
 
+   Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::patch('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->whereNumber('id');
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->whereNumber('id');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->whereNumber('id');
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::put('/products/{id}', [ProductController::class, 'update'])->whereNumber('id');
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->whereNumber('id');
+});
 

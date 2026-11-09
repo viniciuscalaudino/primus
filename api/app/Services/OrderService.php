@@ -122,7 +122,7 @@ class OrderService
 
     public function getOrder(User $user, int $orderId): Order
     {
-        if ($user->role === 'admin') {
+        if ($user->isAdmin()) {
             return Order::with('items')->findOrFail($orderId);
         }
     
@@ -134,10 +134,13 @@ class OrderService
     public function payOrder(User $user, int $orderId): Order
     {
         return DB::transaction(function() use ($user, $orderId) {
-            $order = $user->orders()
-                ->where('id', $orderId)
+            $order = Order::where('id', $orderId)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($order->user_id !== $user->id) {
+                abort(403, 'Você não pode pagar este pedido.');
+            }
             
             if($order->status !== Order::STATUS_AWAITING_PAYMENT) {
                 abort(409, 'Este pedido não pode ser pago.');
@@ -155,10 +158,13 @@ class OrderService
     public function cancelOrder(User $user, int $orderId): Order
     {
         return DB::transaction(function () use ($user, $orderId){
-            $order = $user->orders()
-                ->where('id', $orderId)
+            $order = Order::where('id', $orderId)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($order->user_id !== $user->id && ! $user->isAdmin()) {
+                abort(403, 'Você não pode cancelar este pedido.');
+            }    
 
             if ($order->status !== Order::STATUS_AWAITING_PAYMENT) {
                 abort(409, 'Este pedido não pode ser cancelado.');
@@ -183,6 +189,37 @@ class OrderService
             }
 
             $order->status = Order::STATUS_CANCELLED;
+            $order->save();
+
+            return $order->load('items');
+        });
+    }
+
+    public function getAllOrders(?string $status = null)
+    {
+        $query = Order::with(['user', 'items']);
+
+        if($status !== null) {
+            $query->where('status', $status);
+        }
+
+        return $query->latest()->get();
+    }
+
+    public function updateOrderStatus(int $orderId, string $newStatus): Order
+    {
+        return DB::transaction(function () use ($orderId, $newStatus){ 
+            $order = Order::where('id', $orderId)
+                ->lockForUpdate()
+                ->firstOrFail();
+            
+            $allowedTransitions = Order::TRANSITIONS[$order->status] ?? [];
+
+            if (!in_array($newStatus, $allowedTransitions, true)) {
+                abort(409, 'Transição de status não permitida.');
+            }
+
+            $order->status = $newStatus;
             $order->save();
 
             return $order->load('items');
