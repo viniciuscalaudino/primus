@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\CategoryService;
+use App\Models\Category;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 
@@ -14,7 +15,7 @@ class CategoryController extends Controller
     {
         $categories = $this->categoryService->getAllCategories();
 
-        return CategoryResource::collection($categories);;
+        return CategoryResource::collection($categories);
     }
 
     public function store(CategoryRequest $request)
