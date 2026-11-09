@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateOrderStatusRequest;
 use Illuminate\Http\Request;
 use App\Services\OrderService;
 use App\Http\Resources\OrderResource;

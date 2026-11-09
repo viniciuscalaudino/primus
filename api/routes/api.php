@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
     Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->whereNumber('id');
 });
 
-   Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/products', [ProductController::class, 'adminIndex']);
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::patch('/orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->whereNumber('id');
