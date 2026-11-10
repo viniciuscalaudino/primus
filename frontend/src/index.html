@@ -14,14 +14,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link href="./styles/style.css" rel="stylesheet">
+  <link href="./styles/pages.css" rel="stylesheet">
 </head>
 <body>
 
-<div class="col-6 col-lg-3 footer-item">
-  <i class="bi bi-truck"></i>
-  <div><strong>Frete grátis</strong><small>Em compras a partir de R$ 299</small></div>
-</div>
+  <!-- ============ AVISO DE FRETE ============ -->
+  <div class="topbar">
+    <div class="container">
+      <i class="bi bi-truck me-2"></i>Frete grátis em compras a partir de R$ 299
+    </div>
+  </div>
 
+  <!-- ============ NAVBAR ============ -->
   <nav class="navbar navbar-expand-lg navbar-primus sticky-top">
     <div class="container">
       <button class="navbar-toggler border-0 p-0 me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#menuMobile" aria-label="Abrir menu">
@@ -32,8 +36,8 @@
 
       <ul class="navbar-nav mx-auto d-none d-lg-flex">
         <li class="nav-item"><a class="nav-link active" href="index.html">Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="catalogo.html?category=1">Suplementos</a></li>
-        <li class="nav-item"><a class="nav-link" href="catalogo.html?category=2">Acessórios</a></li>
+        <li class="nav-item"><a class="nav-link" href="catalogo.html">Catálogo</a></li>
+        <li class="nav-item"><a class="nav-link" href="carrinho.html">Carrinho</a></li>
         <li class="nav-item"><a class="nav-link" href="pedidos.html">Meus pedidos</a></li>
         <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
         <!-- Visível só para usuários com papel admin (controlado pelo JS) -->
@@ -47,7 +51,8 @@
       </form>
 
       <div class="nav-icons ms-auto ms-lg-3">
-        <a href="login.html" aria-label="Entrar ou criar conta"><i class="bi bi-person"></i></a>
+        <a href="login.html" id="accountLink" aria-label="Entrar ou criar conta"><i class="bi bi-person"></i></a>
+        <button type="button" id="logoutBtn" class="btn-logout d-none" aria-label="Sair"><i class="bi bi-box-arrow-right"></i></button>
         <a href="carrinho.html" class="cart-link" aria-label="Carrinho">
           <i class="bi bi-cart2"></i>
           <span class="cart-count" id="cartCount">0</span>
@@ -69,8 +74,7 @@
       </form>
       <ul class="list-unstyled mobile-menu">
         <li><a href="index.html">Início</a></li>
-        <li><a href="catalogo.html?category=1">Suplementos</a></li>
-        <li><a href="catalogo.html?category=2">Acessórios</a></li>
+        <li><a href="catalogo.html">Catálogo</a></li>
         <li><a href="carrinho.html">Carrinho</a></li>
         <li><a href="pedidos.html">Meus pedidos</a></li>
         <li><a href="perfil.html">Perfil</a></li>
@@ -78,6 +82,8 @@
       </ul>
     </div>
   </div>
+
+  <div class="toast-container position-fixed top-0 end-0 p-3" id="toastArea"></div>
 
   <main>
 
@@ -96,8 +102,7 @@
     </header>
 
     <!-- ============ CATEGORIAS ============
-         Cada card leva ao catálogo filtrado: catalogo.html?category=ID
-         Os cards abaixo são exemplos; podem ser gerados por GET /api/categories. -->
+         Cada card leva ao catálogo filtrado: catalogo.html?category=ID -->
     <section class="section" id="categorias">
       <div class="container">
         <div class="section-head">
@@ -105,25 +110,16 @@
           <a href="catalogo.html" class="see-all">Ver tudo <i class="bi bi-arrow-right"></i></a>
         </div>
 
-        <div class="row g-3 row-cols-1 row-cols-sm-2">
-          <div class="col">
-            <a href="catalogo.html?category=1" class="cat-card">
-              <div class="cat-img"><i class="bi bi-capsule"></i></div>
-              <div class="cat-info"><strong>Suplementos</strong></div>
-            </a>
-          </div>
-          <div class="col">
-            <a href="catalogo.html?category=2" class="cat-card">
-              <div class="cat-img"><i class="bi bi-cup-straw"></i></div>
-              <div class="cat-info"><strong>Acessórios</strong></div>
-            </a>
-          </div>
-        </div>
+        <!-- O JS gera um card por categoria (GET /api/categories). Modelo de cada card:
+             <div class="col"><a href="catalogo.html?category=ID" class="cat-card">
+               <div class="cat-img"><i class="bi bi-capsule"></i></div>
+               <div class="cat-info"><strong>Nome</strong></div></a></div> -->
+        <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-4" id="categoriesList"></div>
       </div>
     </section>
 
     <!-- ============ NOVIDADES ============
-         Os 4 produtos mais recentes: GET /api/products?sort=recent&per_page=4 -->
+         Os 4 produtos mais recentes: GET /api/products?sort=recent (a API devolve 12; use só os 4 primeiros) -->
     <section class="section pt-0" id="novidades">
       <div class="container">
         <div class="section-head">
@@ -131,7 +127,7 @@
           <a href="catalogo.html?sort=recent" class="see-all">Ver tudo <i class="bi bi-arrow-right"></i></a>
         </div>
 
-        <!-- Container vazio: o JS injeta aqui os cards (GET /api/products?sort=recent&per_page=4).
+        <!-- Container vazio: o JS injeta aqui os cards (GET /api/products?sort=recent, primeiros 4).
              Estrutura esperada de cada card (classes já estilizadas no style.css):
              <article class="product-card [is-unavailable]">
                <span class="badge-tag">Indisponível</span>
@@ -153,19 +149,19 @@
       <div class="row g-4">
         <div class="col-6 col-lg-3 footer-item">
           <i class="bi bi-truck"></i>
-          <div><strong>Entrega para todo o Brasil</strong><small>com rastreamento</small></div>
-        </div>
-        <div class="col-6 col-lg-3 footer-item">
-          <i class="bi bi-shield-check"></i>
-          <div><strong>Compra segura</strong><small>Seus dados protegidos</small></div>
+          <div><strong>Frete grátis</strong><small>Compras a partir de R$ 299</small></div>
         </div>
         <div class="col-6 col-lg-3 footer-item">
           <i class="bi bi-capsule"></i>
           <div><strong>Suplementos e acessórios</strong><small>Tudo para o seu treino</small></div>
         </div>
         <div class="col-6 col-lg-3 footer-item">
-          <i class="bi bi-tag"></i>
-          <div><strong>Promoções especiais</strong><small>Descontos toda semana</small></div>
+          <i class="bi bi-credit-card"></i>
+          <div><strong>Pagamento simulado</strong><small>Projeto acadêmico, sem cartão</small></div>
+        </div>
+        <div class="col-6 col-lg-3 footer-item">
+          <i class="bi bi-person-check"></i>
+          <div><strong>Conta e pedidos</strong><small>Acompanhe o status dos seus pedidos</small></div>
         </div>
       </div>
     </div>
@@ -176,10 +172,11 @@
     <a href="index.html" class="active"><i class="bi bi-house-fill"></i><span>Início</span></a>
     <a href="catalogo.html"><i class="bi bi-grid"></i><span>Catálogo</span></a>
     <a href="carrinho.html" class="cart-link"><i class="bi bi-cart2"></i><span class="cart-count" data-cart-count>0</span><span>Carrinho</span></a>
-    <a href="login.html"><i class="bi bi-person"></i><span>Conta</span></a>
+    <a href="perfil.html"><i class="bi bi-person"></i><span>Conta</span></a>
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="./pages/home.js"></script>
   <!-- O contador do carrinho e os botões "Adicionar ao carrinho" serão ligados à API no seu JS
        (POST /api/cart/items e GET /api/cart). -->
 </body>
