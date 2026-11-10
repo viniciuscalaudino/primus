@@ -207,6 +207,7 @@ class CartService
                 'unit_price' => number_format($unitPriceCents / 100, 2, '.', ''),
                 'quantity' => $item->quantity,
                 'subtotal' => number_format($subtotalCents / 100, 2, '.', ''),
+                'available' => $item->product->active && $item->product->stock >= $item->quantity,
             ];   
         });
 

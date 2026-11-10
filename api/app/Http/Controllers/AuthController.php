@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use App\Http\Requests\UpdateProfileRequest;
 
 class AuthController extends Controller
 {
@@ -47,6 +48,16 @@ class AuthController extends Controller
         $this->authService->logout($request);
 
         return response()->noContent();
+    }
+
+    public function updateMe(UpdateProfileRequest $request)
+    {
+        $user = $this->authService->updateProfile(
+            $request->user(),
+            $request->validated()
+        );
+
+        return new UserResource($user);
     }
 }
 
