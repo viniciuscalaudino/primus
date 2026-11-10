@@ -18,7 +18,8 @@ COPY . .
 
 # Instala as dependências de produção
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
-    && composer check-platform-reqs --no-dev
+    && composer check-platform-reqs --no-dev \
+    && php artisan storage:link
 
 # Ativa as configurações de produção do PHP
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"

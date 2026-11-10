@@ -1,21 +1,27 @@
-import { http, csrfCookie } from './http.js';
+import { http, csrfCookie } from "./http.js";
+import { clearCartToken } from "../utils/storage.js";
 
 export async function register(data) {
-    await csrfCookie();
+  await csrfCookie();
 
-    return http.post('/auth/register', data);
+  const response = await http.post("/auth/register", data);
+  clearCartToken();
+  return response;
 }
 
 export async function login(credentials) {
-    await csrfCookie();
+  await csrfCookie();
 
-    return http.post('/auth/login', credentials);
+  const response = await http.post("/auth/login", credentials);
+  clearCartToken();
+  return response;
 }
 
 export async function logout() {
-    return http.post('/auth/logout');
+  await csrfCookie();
+  return http.post("/auth/logout");
 }
 
 export async function getCurrentUser() {
-    return http.get('/auth/me');
+  return http.get("/auth/me");
 }

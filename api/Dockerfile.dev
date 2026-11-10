@@ -3,7 +3,7 @@ FROM php:8.4-cli-trixie
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libzip-dev \
+    libzip-dev \
     && docker-php-ext-install pdo_mysql zip bcmath \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -19,4 +19,4 @@ RUN composer validate --no-check-publish \
 EXPOSE 8000
 
 # the project bind mount is available only when the container starts
-CMD ["php", "artisan", "serve", "--host=0.0.0.0"]
+CMD ["sh", "-c", "php artisan storage:link || true; exec php artisan serve --host=0.0.0.0"]

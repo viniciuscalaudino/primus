@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
@@ -22,6 +21,7 @@ class ProductRequest extends FormRequest
                 'stock' => ['required', 'integer', 'min:0'],
                 'category_id' => ['required', 'exists:categories,id'],
                 'active' => ['required', 'boolean'],
+                'image' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             ];
         }
 
@@ -32,6 +32,7 @@ class ProductRequest extends FormRequest
             'stock' => ['sometimes', 'required', 'integer', 'min:0'],
             'category_id' => ['sometimes', 'required', 'exists:categories,id'],
             'active' => ['sometimes', 'required', 'boolean'],
+            'image' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 }

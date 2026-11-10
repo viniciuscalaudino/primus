@@ -6,7 +6,7 @@ export async function requireAuth() {
 
         return response.data;
     } catch (error) {
-        window.location.href = '/pages/login.html';
+        window.location.href = 'login.html';
         return null;
     }
 }

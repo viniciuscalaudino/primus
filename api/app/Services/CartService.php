@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
@@ -11,25 +10,22 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 
-
 class CartService
 {
     public function resolveCart(?User $user, ?string $guestToken): Cart
     {
-        if ($user !== null){
+        if ($user !== null) {
             return Cart::firstOrCreate([
                 'user_id' => $user->id
             ]);
         }
 
-        if($guestToken !== null){
+        if ($guestToken !== null) {
             $cart = Cart::where('guest_token', $guestToken)->first();
-            
-            if($cart === null){
-                throw ValidationException::withMessages(['cart' => 'Carrinho não encontrado.']);
-            }
 
-            return $cart;
+            if ($cart !== null) {
+                return $cart;
+            }
         }
 
         return Cart::create([
@@ -39,17 +35,17 @@ class CartService
 
     public function findCart(?User $user, ?string $guestToken): Cart
     {
-        if ($user !== null){
+        if ($user !== null) {
             $cart = Cart::where('user_id', $user->id)->first();
-        }elseif($guestToken !== null){
+        } elseif ($guestToken !== null) {
             $cart = Cart::where('guest_token', $guestToken)->first();
-        }else{
+        } else {
             throw ValidationException::withMessages(['cart' => 'Identificação do carrinho não informada.']);
-        }       
-        if($cart === null){
-            throw ValidationException::withMessages(['cart' => 'Carrinho não encontrado.']); 
-        } 
-        
+        }
+        if ($cart === null) {
+            throw ValidationException::withMessages(['cart' => 'Carrinho não encontrado.']);
+        }
+
         return $cart;
     }
 
@@ -58,26 +54,34 @@ class CartService
         return Cart::where('guest_token', $guestToken)->first();
     }
 
-    public function addItem (Cart $cart, Product $product, int $quantity = 1): CartItem
+    public function addItem(Cart $cart, Product $product, int $quantity = 1): CartItem
     {
-        return  DB::transaction(function() use ($cart, $product, $quantity){
-            if($quantity < 1){
+        return  DB::transaction(function () use ($cart, $product, $quantity) {
+            if ($quantity < 1) {
                 throw ValidationException::withMessages(['quantity' => 'A quantidade mínima é 1.']);
             }
 
             $product = Product::where('id', $product->id)->lockForUpdate()->firstOrFail();
 
-            if(!$product->active || $product->stock < 1 ){
-                throw ValidationException::withMessages(['product' => 'Produto indisponível.']);
+            if (!$product->active || $product->stock < 1) {
+                throw ValidationException::withMessages([
+                    'product' => 'Produto indisponível ou sem estoque.',
+                ]);
             }
 
             $item = $cart->items()->where('product_id', $product->id)->first();
-            
+
             $currentQuantity = $item?->quantity ?? 0;
             $newQuantity = $currentQuantity + $quantity;
-        
-            if($newQuantity > $product->stock){
-                throw ValidationException::withMessages(['quantity' => 'Estoque insuficiente.',]);
+
+            if ($newQuantity > $product->stock) {
+                $availableToAdd = max(0, $product->stock - $currentQuantity);
+
+                throw ValidationException::withMessages([
+                    'quantity' => [
+                        "Estoque insuficiente. Você ainda pode adicionar no máximo {$availableToAdd} unidade(s).",
+                    ],
+                ]);
             }
 
             return $cart->items()->updateOrCreate(
@@ -89,27 +93,26 @@ class CartService
 
     public function updateItemQuantity(Cart $cart, int $productId, int $quantity): void
     {
-        DB::transaction(function() use ($cart, $productId, $quantity){
+        DB::transaction(function () use ($cart, $productId, $quantity) {
             if ($productId < 1) {
-            throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
+                throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
             }
 
-            if($quantity === 0){
+            if ($quantity === 0) {
                 $cart->items()
                 ->where('product_id', $productId)
                 ->delete();
 
                 return;
+            } elseif ($quantity < 0) {
+                throw ValidationException::withMessages(['product' => 'Valor informado não aceito.']);
             }
-            elseif($quantity < 0){
-                throw ValidationException::withMessages(['product' => 'Valor informado não aceito.']);   
-            }
-            
+
             $product = Product::where('id', $productId)->lockForUpdate()->firstOrFail();
 
             $item = $cart->items()->where('product_id', $productId)->first();
-        
-            if(!$item){
+
+            if (!$item) {
                 throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
             }
 
@@ -119,27 +122,27 @@ class CartService
 
             $item->update([
                 'quantity' => $quantity,
-            ]); 
+            ]);
         });
     }
 
     public function mergeGuestCart(User $user, string $guestToken): array
     {
-        return DB::transaction(function () use ($user, $guestToken){
+        return DB::transaction(function () use ($user, $guestToken) {
             $warnings = [];
 
             $guestCart = Cart::where('guest_token', $guestToken)->with('items')->first();
 
-            if (!$guestCart){
+            if (!$guestCart) {
                 return ['products' => []];
             }
 
             $cartUser = Cart::firstOrCreate(['user_id' => $user->id]);
 
-            foreach($guestCart->items as $item){
+            foreach ($guestCart->items as $item) {
                 $product = Product::where('id', $item->product_id)->lockForUpdate()->firstOrFail();
-                
-                if($product->stock < 1 || !$product->active){
+
+                if ($product->stock < 1 || !$product->active) {
                     $warnings['products'][] = [
                         'product_id' => $item->product_id,
                         'message' => $product->name .': Produto indisponível ou fora de estoque.'
@@ -176,11 +179,11 @@ class CartService
         if ($productId < 1) {
             throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
         }
-    
+
         $item = $cart->items()->where('product_id', $productId)->first();
-    
-        if(!$item){
-             throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
+
+        if (!$item) {
+            throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
         }
 
         $item->delete();
@@ -191,10 +194,10 @@ class CartService
         $items = $cart->items()
             ->with('product')
             ->get();
-        
+
         $totalCents = 0;
 
-        $items = $items->map(function($item ) use (&$totalCents) {
+        $items = $items->map(function ($item) use (&$totalCents) {
             $unitPriceCents = (int) str_replace('.', '', $item->product->price);
 
             $subtotalCents = $unitPriceCents * $item->quantity;
@@ -204,11 +207,12 @@ class CartService
             return [
                 'product_id' => $item->product_id,
                 'name' => $item->product->name,
+                'stock' => $item->product->stock,
                 'unit_price' => number_format($unitPriceCents / 100, 2, '.', ''),
                 'quantity' => $item->quantity,
                 'subtotal' => number_format($subtotalCents / 100, 2, '.', ''),
                 'available' => $item->product->active && $item->product->stock >= $item->quantity,
-            ];   
+            ];
         });
 
         return [

@@ -1,45 +1,50 @@
-import { http } from './http.js';
+import { http } from "./http.js";
 
 // PEDIDOS
 
 export async function getAdminOrders(params = {}) {
-    return http.get('/admin/orders', { params });
+  return http.get("/admin/orders", { params });
 }
 
 export async function updateOrderStatus(id, status) {
-    return http.patch(`/admin/orders/${id}/status`, {
-        status,
-    });
+  return http.patch(`/admin/orders/${id}/status`, {
+    status,
+  });
 }
 
 // CATEGORIAS
 
 export async function createCategory(data) {
-    return http.post('/admin/categories', data);
+  return http.post("/admin/categories", data);
 }
 
 export async function updateCategory(id, data) {
-    return http.put(`/admin/categories/${id}`, data);
+  return http.put(`/admin/categories/${id}`, data);
 }
 
 export async function deleteCategory(id) {
-    return http.delete(`/admin/categories/${id}`);
+  return http.delete(`/admin/categories/${id}`);
 }
 
 // PRODUTOS
 
 export async function getAdminProducts(params = {}) {
-    return http.get('/admin/products', { params });
+  return http.get("/admin/products", { params });
 }
 
 export async function createProduct(data) {
-    return http.post('/admin/products', data);
+  return http.post("/admin/products", data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 }
 
 export async function updateProduct(id, data) {
-    return http.put(`/admin/products/${id}`, data);
+  data.append("_method", "PUT");
+  return http.post(`/admin/products/${id}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
 }
 
 export async function deactivateProduct(id) {
-    return http.delete(`/admin/products/${id}`);
+  return http.delete(`/admin/products/${id}`);
 }

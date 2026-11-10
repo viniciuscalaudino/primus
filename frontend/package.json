@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node -e 'const fs = require(\"node:fs\"); const path = \"dist/src/pages\"; for (const file of fs.readdirSync(path).filter((name) => name.endsWith(\".html\"))) { const html = fs.readFileSync(`${path}/${file}`, \"utf8\").replaceAll(\"../../assets/\", \"assets/\"); fs.writeFileSync(`dist/${file}`, html); }'",
     "preview": "vite preview"
   },
   "devDependencies": {

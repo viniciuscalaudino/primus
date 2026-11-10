@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pedido | PRIMUS</title>
+  <title>Página não encontrada | PRIMUS</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="./styles/style.css" rel="stylesheet">
-  <link href="./styles/pages.css" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="../styles/pages.css">
 </head>
 <body>
   <div class="topbar">
@@ -27,12 +27,12 @@
       <a class="navbar-brand logo" href="index.html">PRIMUS</a>
       <ul class="navbar-nav mx-auto d-none d-lg-flex">
         <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="catalogo.html">Catálogo</a></li>
-        <li class="nav-item"><a class="nav-link active" href="pedidos.html">Meus pedidos</a></li>
+        <li class="nav-item"><a class="nav-link" href="products.html">Catálogo</a></li>
+        <li class="nav-item"><a class="nav-link" href="pedidos.html">Meus pedidos</a></li>
         <li class="nav-item"><a class="nav-link" href="perfil.html">Perfil</a></li>
         <li class="nav-item d-none" data-role="admin"><a class="nav-link" href="admin.html">Painel</a></li>
       </ul>
-      <form class="search-box d-none d-lg-flex" role="search" action="catalogo.html" method="get">
+      <form class="search-box d-none d-lg-flex" role="search" action="products.html" method="get">
         <i class="bi bi-search"></i>
         <input type="search" name="q" placeholder="Buscar produtos..." aria-label="Buscar produtos">
       </form>
@@ -53,13 +53,13 @@
       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
     </div>
     <div class="offcanvas-body">
-      <form class="search-box mb-3" role="search" action="catalogo.html" method="get">
+      <form class="search-box mb-3" role="search" action="products.html" method="get">
         <i class="bi bi-search"></i>
         <input type="search" name="q" placeholder="Buscar produtos..." aria-label="Buscar produtos">
       </form>
       <ul class="list-unstyled mobile-menu">
         <li><a href="index.html">Início</a></li>
-        <li><a href="catalogo.html">Catálogo</a></li>
+        <li><a href="products.html">Catálogo</a></li>
         <li><a href="carrinho.html">Carrinho</a></li>
         <li><a href="pedidos.html">Meus pedidos</a></li>
         <li><a href="perfil.html">Perfil</a></li>
@@ -71,41 +71,12 @@
   <div class="toast-container position-fixed top-0 end-0 p-3" id="toastArea"></div>
 
   <main>
-    <section class="section">
-      <div class="container">
-        <nav aria-label="breadcrumb"><ol class="breadcrumb breadcrumb-primus">
-          <li class="breadcrumb-item"><a href="pedidos.html">Meus pedidos</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Pedido #<span id="orderIdCrumb"></span></li>
-        </ol></nav>
-        <div class="alert alert-danger d-none" role="alert" id="orderAlert"></div>
-        <div class="state-box d-none" id="orderNotFound"><i class="bi bi-emoji-frown"></i><p>Pedido não encontrado.</p></div>
-
-        <div class="row g-4" id="orderDetail">
-          <div class="col-lg-8">
-            <div class="panel">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h3 class="mb-0">Pedido #<span id="orderId"></span></h3>
-                <span class="status-badge" id="orderStatus"></span>
-              </div>
-              <small class="text-secondary d-block mb-3" id="orderDate"></small>
-              <ul class="summary-items" id="orderItems"></ul>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <aside class="panel summary">
-              <h3>Totais</h3>
-              <div class="summary-line"><span>Subtotal</span><span id="orderSubtotal"></span></div>
-              <div class="summary-line"><span>Frete</span><span id="orderShipping"></span></div>
-              <div class="summary-line total"><span>Total</span><strong id="orderTotal"></strong></div>
-              <h4 class="mt-4">Entrega</h4>
-              <address class="text-secondary small" id="orderAddress"></address>
-              <!-- visíveis conforme o status: awaiting_payment mostra os dois -->
-              <p class="text-secondary small d-none" id="payNote"><i class="bi bi-info-circle me-1"></i>Pagamento simulado, para fins acadêmicos. Nenhum dado de cartão é solicitado.</p>
-      <button type="button" class="btn btn-primus w-100 d-none" id="payBtn">Pagar pedido</button>
-              <button type="button" class="btn btn-outline-danger w-100 mt-2 d-none" id="cancelBtn">Cancelar pedido</button>
-            </aside>
-          </div>
-        </div>
+    <section class="auth-wrap">
+      <div class="not-found">
+        <div class="nf-code">404</div>
+        <h1>Página não encontrada</h1>
+        <p class="text-secondary">O endereço que você acessou não existe ou foi movido.</p>
+        <a href="index.html" class="btn btn-primus">Voltar ao início</a>
       </div>
     </section>
   </main>
@@ -116,12 +87,11 @@
 
   <nav class="bottom-nav d-lg-none">
     <a href="index.html"><i class="bi bi-house-fill"></i><span>Início</span></a>
-    <a href="catalogo.html"><i class="bi bi-grid"></i><span>Catálogo</span></a>
+    <a href="products.html"><i class="bi bi-grid"></i><span>Catálogo</span></a>
     <a href="carrinho.html" class="cart-link"><i class="bi bi-cart2"></i><span class="cart-count" data-cart-count>0</span><span>Carrinho</span></a>
     <a href="perfil.html"><i class="bi bi-person"></i><span>Conta</span></a>
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="./js/pages/pedido.js"></script>
-</body>
+  <script type="module" src="../scripts/notfound.js"></script>
 </html>

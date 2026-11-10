@@ -3,6 +3,10 @@
 namespace App\Services;
 
 use App\Models\Product;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 class ProductService
 {
@@ -15,12 +19,63 @@ class ProductService
 
     public function createProduct(array $data): Product
     {
-        return Product::create($data);
+        $image = $data['image'] ?? null;
+        unset($data['image']);
+
+        $imagePath = $image instanceof UploadedFile
+            ? $image->store('products', 'public')
+            : null;
+
+        if ($image instanceof UploadedFile && ! $imagePath) {
+            throw new RuntimeException('Não foi possível armazenar a imagem do produto.');
+        }
+
+        if ($imagePath) {
+            $data['image_url'] = $imagePath;
+        }
+
+        try {
+            return Product::create($data)->load('category');
+        } catch (Throwable $exception) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            throw $exception;
+        }
     }
 
     public function updateProduct(Product $product, array $data): Product
     {
-        $product->update($data);
+        $image = $data['image'] ?? null;
+        unset($data['image']);
+
+        $newImagePath = $image instanceof UploadedFile
+            ? $image->store('products', 'public')
+            : null;
+
+        if ($image instanceof UploadedFile && ! $newImagePath) {
+            throw new RuntimeException('Não foi possível armazenar a imagem do produto.');
+        }
+        $oldImagePath = $product->image_url;
+
+        if ($newImagePath) {
+            $data['image_url'] = $newImagePath;
+        }
+
+        try {
+            $product->update($data);
+        } catch (Throwable $exception) {
+            if ($newImagePath) {
+                Storage::disk('public')->delete($newImagePath);
+            }
+
+            throw $exception;
+        }
+
+        if ($newImagePath && str_starts_with((string) $oldImagePath, 'products/')) {
+            Storage::disk('public')->delete($oldImagePath);
+        }
 
         return $product->load('category');
     }
