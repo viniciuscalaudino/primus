@@ -18,6 +18,7 @@ Route::prefix('auth')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
+        Route::patch('me', [AuthController::class, 'updateMe']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
@@ -25,9 +26,9 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->prefix('addresses')->group(function () {
     Route::get('/', [AddressController::class, 'index']);
     Route::post('/', [AddressController::class, 'store']);
-    Route::patch('/{addressId}/default', [AddressController::class, 'setDefault']);
+    Route::patch('/{addressId}/default', [AddressController::class, 'setDefault'])->whereNumber('addressId');
 });
-        
+
 Route::get('categories', [CategoryController::class, 'index']);
 
 Route::get('products',[ProductController::class, 'index']);
@@ -47,7 +48,6 @@ Route::middleware('auth:sanctum')->prefix('orders')->group(function () {
     Route::get('/{id}', [OrderController::class, 'show'])->whereNumber('id');
     Route::post('/{id}/pay', [OrderController::class, 'pay'])->whereNumber('id');
     Route::post('/{id}/cancel', [OrderController::class, 'cancel'])->whereNumber('id');
-    Route::patch('me', [AuthController::class, 'updateMe']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {

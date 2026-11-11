@@ -116,6 +116,7 @@ class OrderService
     public function getUserOrders(User $user)
     {
         return $user->orders()
+            ->with('items')
             ->latest()
             ->get();
     }
