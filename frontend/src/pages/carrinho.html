@@ -76,8 +76,7 @@
       <div class="container">
         <div class="section-head"><h2>Carrinho</h2></div>
 
-        <!-- avisos da fusão (cart_warnings.products[]) ou de itens indisponíveis -->
-        <div id="cartAlerts"></div>
+                <div id="cartAlerts"></div>
 
         <div class="state-box d-none" id="cartLoading"><div class="spinner-border text-danger" role="status"></div></div>
         <div class="state-box d-none" id="cartEmpty"><i class="bi bi-cart-x"></i><p>Seu carrinho está vazio.</p><a href="products.html" class="btn btn-primus">Ver produtos</a></div>
@@ -101,8 +100,7 @@
       </div>
     </section>
 
-    <!-- Linha do carrinho (o JS clona). Item indisponível: classe is-unavailable e aviso em data-field="warning". -->
-    <template id="cartItemTemplate">
+        <template id="cartItemTemplate">
       <li class="cart-item" data-product-id="">
         <div class="cart-thumb"><img data-field="image" alt="" class="d-none"><i class="bi bi-image"></i></div>
         <div class="cart-info">

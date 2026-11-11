@@ -3,12 +3,8 @@ import { initNavigation } from "../components/navigation.js";
 import { formatPrice } from "../utils/format.js";
 import { $, getErrorMessage, getRecord, toast } from "../utils/dom.js";
 
-// Evita dois pedidos ao mesmo tempo (cliques rápidos no + ou no -)
 let busy = false;
 
-// firstLoad = true só na abertura da página: mostra o spinner e esconde o conteúdo.
-// Nas atualizações seguintes (mudar quantidade, remover) o conteúdo continua na tela
-// e só é trocado quando os dados novos chegam, sem piscar.
 async function loadCart(firstLoad = false) {
   if (firstLoad) {
     $("#cartLoading")?.classList.remove("d-none");
@@ -40,11 +36,11 @@ async function loadCart(firstLoad = false) {
       if (img && item.image_url) {
         img.src = item.image_url;
         img.alt = item.name;
-        img.classList.remove('d-none');
-        img.nextElementSibling?.classList.add('d-none');
+        img.classList.remove("d-none");
+        img.nextElementSibling?.classList.add("d-none");
         img.onerror = () => {
-          img.classList.add('d-none');
-          img.nextElementSibling?.classList.remove('d-none');
+          img.classList.add("d-none");
+          img.nextElementSibling?.classList.remove("d-none");
         };
       }
       node.querySelector('[data-field="unitPrice"]').textContent =
@@ -100,7 +96,6 @@ async function loadCart(firstLoad = false) {
       rows.push(node);
     });
 
-    // Troca a lista inteira de uma vez, só depois de montar tudo
     list.replaceChildren(...rows);
 
     const hasUnavailable = items.some((item) => item.available === false);

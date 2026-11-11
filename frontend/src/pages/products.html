@@ -83,8 +83,7 @@
           </div>
           <select class="form-select form-primus" id="categoryFilter" name="category" aria-label="Categoria">
             <option value="">Todas as categorias</option>
-            <!-- categorias: GET /api/categories -->
-          </select>
+                      </select>
           <select class="form-select form-primus" id="sortSelect" name="sort" aria-label="Ordenar">
             <option value="recent">Mais recentes</option>
             <option value="price_asc">Menor preço</option>
@@ -103,8 +102,7 @@
       </div>
     </section>
 
-    <!-- Modelo do card (o JS clona e preenche). Produto sem estoque: classe is-unavailable + botão desabilitado. -->
-    <template id="productCardTemplate">
+        <template id="productCardTemplate">
       <article class="product-card" data-id="">
         <span class="badge-tag d-none" data-field="badge">Indisponível</span>
         <a class="product-link" data-field="link" href="produto.html">

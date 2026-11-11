@@ -29,7 +29,7 @@ async function loadOrders() {
         if (value !== undefined) el.textContent = value;
       });
       root.querySelector('[data-field="status"]').dataset.status = order.status;
-      // O próprio card (root) já é o <a>: querySelector("a") procura só DENTRO dele
+
       root.href = `pedido.html?id=${order.id}`;
       list.append(card);
     });

@@ -35,7 +35,10 @@ async function loadOrder() {
       items.append(li);
     });
     $("#orderDetail")?.classList.remove("d-none");
-    $("#payNote")?.classList.toggle("d-none", order.status !== "awaiting_payment");
+    $("#payNote")?.classList.toggle(
+      "d-none",
+      order.status !== "awaiting_payment",
+    );
     $("#payBtn").classList.toggle(
       "d-none",
       order.status !== "awaiting_payment",

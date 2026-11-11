@@ -9,7 +9,7 @@ export async function initNavigation() {
   if (navigationReady) return;
   navigationReady = true;
 
-  // Avisos da fusão do carrinho (ajustes de quantidade, itens indisponíveis)
+  
   takeCartWarnings().forEach((warning) =>
     toast(warning.message || String(warning), "warning"),
   );
