@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\CategoryService;
-use App\Models\Category;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 
@@ -31,10 +30,8 @@ class CategoryController extends Controller
 
     public function update(CategoryRequest $request, int $id)
     {
-        $category = Category::findOrFail($id);
-
-        $category = $this->categoryService->updateCategory(
-            $category,
+        $category = $this->categoryService->updateCategoryById(
+            $id,
             $request->validated()
         );
 
@@ -43,9 +40,7 @@ class CategoryController extends Controller
 
     public function destroy(int $id)
     {
-        $category = Category::findOrFail($id);
-
-        $this->categoryService->deleteCategory($category);
+        $this->categoryService->deleteCategoryById($id);
 
         return response()->noContent();
     }

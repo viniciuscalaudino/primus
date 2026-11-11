@@ -31,7 +31,7 @@ Para outra URL: `VITE_API_URL=https://minha-api.com/api docker compose up --buil
 
 ## Credenciais dos seeders
 
-Senha de todos: `senha123`
+Senha de todos: `Primus@2026!`
 
 | Usuário | E-mail | Papel |
 |---|---|---|

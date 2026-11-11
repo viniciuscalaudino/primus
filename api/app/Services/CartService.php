@@ -54,14 +54,16 @@ class CartService
         return Cart::where('guest_token', $guestToken)->first();
     }
 
-    public function addItem(Cart $cart, Product $product, int $quantity = 1): CartItem
+    public function addItem(Cart $cart, int $productId, int $quantity = 1): CartItem
     {
-        return  DB::transaction(function () use ($cart, $product, $quantity) {
+        return DB::transaction(function () use ($cart, $productId, $quantity) {
+            $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
+
             if ($quantity < 1) {
                 throw ValidationException::withMessages(['quantity' => 'A quantidade mínima é 1.']);
             }
 
-            $product = Product::where('id', $product->id)->lockForUpdate()->firstOrFail();
+            $product = Product::where('id', $productId)->lockForUpdate()->firstOrFail();
 
             if (!$product->active || $product->stock < 1) {
                 throw ValidationException::withMessages([
@@ -94,6 +96,8 @@ class CartService
     public function updateItemQuantity(Cart $cart, int $productId, int $quantity): void
     {
         DB::transaction(function () use ($cart, $productId, $quantity) {
+            $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
+
             if ($productId < 1) {
                 throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
             }
@@ -131,16 +135,37 @@ class CartService
         return DB::transaction(function () use ($user, $guestToken) {
             $warnings = [];
 
-            $guestCart = Cart::where('guest_token', $guestToken)->with('items')->first();
+            $guestCart = Cart::where('guest_token', $guestToken)
+                ->lockForUpdate()
+                ->with('items')
+                ->first();
 
             if (!$guestCart) {
                 return ['products' => []];
             }
 
-            $cartUser = Cart::firstOrCreate(['user_id' => $user->id]);
+            $cartUser = Cart::where('user_id', $user->id)
+                ->lockForUpdate()
+                ->first();
 
-            foreach ($guestCart->items as $item) {
-                $product = Product::where('id', $item->product_id)->lockForUpdate()->firstOrFail();
+            if (!$cartUser) {
+                $cartUser = Cart::create(['user_id' => $user->id]);
+            }
+
+            $items = $guestCart->items->sortBy('product_id')->values();
+            $productIds = $items->pluck('product_id')->unique()->values();
+            $products = Product::whereIn('id', $productIds)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            foreach ($items as $item) {
+                $product = $products->get($item->product_id);
+
+                if (!$product) {
+                    continue;
+                }
 
                 if ($product->stock < 1 || !$product->active) {
                     $warnings['products'][] = [
@@ -176,17 +201,21 @@ class CartService
 
     public function removeItem(Cart $cart, int $productId): void
     {
-        if ($productId < 1) {
-            throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
-        }
+        DB::transaction(function () use ($cart, $productId) {
+            $cart = Cart::whereKey($cart->id)->lockForUpdate()->firstOrFail();
 
-        $item = $cart->items()->where('product_id', $productId)->first();
+            if ($productId < 1) {
+                throw ValidationException::withMessages(['product' => 'ID do produto inválido.']);
+            }
 
-        if (!$item) {
-            throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.',]);
-        }
+            $item = $cart->items()->where('product_id', $productId)->first();
 
-        $item->delete();
+            if (!$item) {
+                throw ValidationException::withMessages(['product' => 'Produto não encontrado no carrinho.']);
+            }
+
+            $item->delete();
+        });
     }
 
     public function getCart(Cart $cart): array

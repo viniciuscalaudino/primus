@@ -25,3 +25,7 @@
 /api/Thumbs.db
 /api/laravel
 *.sqlite
+# Variáveis locais do frontend
+/frontend/.env
+/frontend/.env.*
+!/frontend/.env.example

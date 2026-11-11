@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Services\CartService;
 use Illuminate\Http\Request;
-use App\Models\Product;
 
 class CartController extends Controller
 {
@@ -42,9 +41,11 @@ class CartController extends Controller
 
         $cart = $this->cartService->resolveCart($user, $guestToken);
 
-        $product = Product::findOrFail($validated['product_id']);
-
-        $this->cartService->addItem($cart, $product, $validated['quantity']);
+        $this->cartService->addItem(
+            $cart,
+            $validated['product_id'],
+            $validated['quantity']
+        );
         
         return response()->json([
             'message' => 'Produto adicionado ao carrinho com sucesso.',

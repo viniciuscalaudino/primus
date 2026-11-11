@@ -17,14 +17,16 @@ class UserSeeder extends Seeder
             ['name' => 'Cliente 3', 'email' => 'cliente3@primus.com', 'role' => 'customer'],
         ];
         
+       
         foreach ($users as $data) {
-            $user = new User([
-                'name'     => $data['name'],
-                'email'    => $data['email'],
-                'password' => 'Primus@2026!',
-            ]);
-            $user->role = $data['role'];
-            $user->save();
+            User::updateOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name'     => $data['name'],
+                    'password' => 'Primus@2026!',
+                    'role'     => $data['role'],
+                ]
+            );
         }
     }
 }

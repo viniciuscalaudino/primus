@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instala as dependências do projeto
-RUN npm install
+RUN npm ci
 
 # Copia o restante dos arquivos do front-end
 COPY . .
@@ -27,6 +27,9 @@ FROM nginx:alpine
 
 # Copia os arquivos gerados pelo build para o Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Usa a configuração que entrega a página 404 personalizada.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Informa que a aplicação utiliza a porta 80
 EXPOSE 80

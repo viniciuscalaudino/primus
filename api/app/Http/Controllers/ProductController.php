@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductRequest;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
 use App\Services\ProductService;
 
 class ProductController extends Controller
@@ -14,36 +13,17 @@ class ProductController extends Controller
 
     public function show(int $id)
     {
-        $product = Product::with('category')
-                ->where('active', true)
-                ->findOrFail($id);
-
-        return new ProductResource($product);
+        return new ProductResource(
+            $this->productService->getActiveProduct($id)
+        );
     }
 
     public function index(Request $request)
     {
-        $products = Product::with('category')
-                ->where('active', true)
-                ->when($request->query('q'), function ($query, $q) {
-                    $query -> where('name', 'like', '%' . $q . '%');
-                })
-                ->when($request->query('category'), function ($query, $category) {
-                    $query -> where('category_id', $category);
-                })
-                 ->when($request->query('sort'), function ($query, $sort) {
-                    match($sort){
-                        'price_asc' => $query -> orderBy('price', 'asc'),
-                        'price_desc' => $query -> orderBy('price', 'desc'),
-                        'recent' => $query -> latest(),
-                        default => $query -> latest(),
-                    };
-                },function ($query) {
-                    $query -> latest();
-                })
-                ->orderByDesc('id')
-                -> paginate(12);
-        
+        $products = $this->productService->getCatalog(
+            $request->only(['q', 'category', 'sort'])
+        );
+
         return ProductResource::collection($products);
     }
 
@@ -67,10 +47,8 @@ class ProductController extends Controller
 
     public function update(ProductRequest $request, int $id)
     {
-        $product = Product::findOrFail($id);
-
-        $product = $this->productService->updateProduct(
-            $product,
+        $product = $this->productService->updateProductById(
+            $id,
             $request->validated()
         );
 
@@ -79,9 +57,7 @@ class ProductController extends Controller
 
     public function destroy(int $id)
     {
-        $product = Product::findOrFail($id);
-
-        $this->productService->deactivateProduct($product);
+        $this->productService->deactivateProductById($id);
 
         return response()->noContent();
     }

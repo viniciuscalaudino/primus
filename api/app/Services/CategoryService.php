@@ -16,15 +16,18 @@ class CategoryService
         return Category::create($data);
     }
 
-      public function updateCategory(Category $category, array $data): Category
+    public function updateCategoryById(int $id, array $data): Category
     {
+        $category = Category::findOrFail($id);
         $category->update($data);
 
         return $category;
     }
 
-    public function deleteCategory(Category $category): void
+    public function deleteCategoryById(int $id): void
     {
+        $category = Category::findOrFail($id);
+
         if ($category->products()->exists()) {
             abort(409, 'Não é possível excluir uma categoria que possui produtos.');
         }

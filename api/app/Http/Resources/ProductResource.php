@@ -17,7 +17,7 @@ class ProductResource extends JsonResource
             'price' => $this-> price,
             'image_url' => $this->imageUrl(),
             'stock' => $this-> stock,
-            'available' => $this-> stock > 0,
+            'available' => $this->active && $this->stock > 0,
             'active' => $this->active,
             'category' => new CategoryResource($this-> whenLoaded('category')),
         ];

@@ -31,16 +31,9 @@ class AdminOrderController extends Controller
         return OrderResource::collection($orders);
     }
 
-    public function updateStatus(Request $request, int $id)
+    public function updateStatus(UpdateOrderStatusRequest $request, int $id)
     {
-        $status = $request->input('status');
-
-        if (!in_array($status, [
-            Order::STATUS_SHIPPED,
-            Order::STATUS_DELIVERED,
-        ], true)) {
-            abort(422, 'Status inválido.');
-        }
+        $status = $request->validated('status');
 
         $order = $this->orderService->updateOrderStatus($id, $status);
 
