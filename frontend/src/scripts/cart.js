@@ -36,6 +36,17 @@ async function loadCart(firstLoad = false) {
       const isAvailable = item.available !== false;
       row.classList.toggle("is-unavailable", !isAvailable);
       node.querySelector('[data-field="name"]').textContent = item.name;
+      const img = node.querySelector('[data-field="image"]');
+      if (img && item.image_url) {
+        img.src = item.image_url;
+        img.alt = item.name;
+        img.classList.remove('d-none');
+        img.nextElementSibling?.classList.add('d-none');
+        img.onerror = () => {
+          img.classList.add('d-none');
+          img.nextElementSibling?.classList.remove('d-none');
+        };
+      }
       node.querySelector('[data-field="unitPrice"]').textContent =
         `${formatPrice(item.unit_price || item.price)} cada`;
       node.querySelector('[data-field="subtotal"]').textContent = formatPrice(

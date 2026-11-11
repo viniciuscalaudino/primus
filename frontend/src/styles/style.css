@@ -461,3 +461,30 @@ h1, h2, h3, h4 { font-family: var(--font-title); }
   .product-row { grid-template-columns: repeat(2, 1fr); gap: .8rem; }
   .product-img { height: 120px; font-size: 2.8rem; }
 }
+/* Footer sempre no fim da página */
+body { min-height: 100vh; display: flex; flex-direction: column; }
+body > main { flex: 1 0 auto; }
+body > .footer { margin-top: auto; }
+
+/* ---------- Header (logo em imagem + menu em pílula) ---------- */
+.logo-img { height: 40px; width: auto; display: block; }
+@media (max-width: 991.98px) { .logo-img { height: 34px; } }
+.navbar-primus .nav-link {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: .82rem;
+  font-weight: 500;
+  padding: .42rem .95rem;
+  border-radius: 50px;
+}
+.navbar-primus .nav-link.active { background: var(--accent); color: #fff; }
+.navbar-primus .nav-link.active::after { display: none; }
+
+/* ---------- Hero com foto de fundo ---------- */
+.hero {
+  background:
+    linear-gradient(90deg, rgba(8,8,10,.85) 0%, rgba(8,8,10,.45) 50%, rgba(8,8,10,.1) 100%),
+    url("/hero.jpg") center / cover no-repeat,
+    #08080a;
+}

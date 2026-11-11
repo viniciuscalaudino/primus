@@ -313,3 +313,8 @@ textarea.form-primus { min-height: auto; }
   .breadcrumb-primus { font-size: .78rem; }
 }
 }
+
+/* Footer sempre no fim da página */
+body { min-height: 100vh; display: flex; flex-direction: column; }
+body > main { flex: 1 0 auto; }
+body > .footer { margin-top: auto; }

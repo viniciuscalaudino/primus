@@ -207,6 +207,7 @@ class CartService
             return [
                 'product_id' => $item->product_id,
                 'name' => $item->product->name,
+                'image_url' => $this->imageUrl($item->product->image_url),
                 'stock' => $item->product->stock,
                 'unit_price' => number_format($unitPriceCents / 100, 2, '.', ''),
                 'quantity' => $item->quantity,
@@ -219,5 +220,20 @@ class CartService
             'items' => $items,
             'total' => number_format($totalCents / 100, 2, '.', ''),
         ];
+    }
+
+    private function imageUrl(?string $path): ?string
+    {
+        if (! $path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $baseUrl = rtrim((string) config('filesystems.disks.public.url', url('/storage')), '/');
+
+        return $baseUrl.'/'.ltrim($path, '/');
     }
 }

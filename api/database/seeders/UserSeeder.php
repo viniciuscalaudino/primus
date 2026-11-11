@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             $user = new User([
                 'name'     => $data['name'],
                 'email'    => $data['email'],
-                'password' => 'senha123',
+                'password' => 'Primus@2026!',
             ]);
             $user->role = $data['role'];
             $user->save();
