@@ -7,7 +7,6 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-
     public function run(): void
     {
         $users = [
@@ -16,17 +15,17 @@ class UserSeeder extends Seeder
             ['name' => 'Cliente 2', 'email' => 'cliente2@primus.com', 'role' => 'customer'],
             ['name' => 'Cliente 3', 'email' => 'cliente3@primus.com', 'role' => 'customer'],
         ];
-        
-       
+
         foreach ($users as $data) {
-            User::updateOrCreate(
-                ['email' => $data['email']],
-                [
-                    'name'     => $data['name'],
-                    'password' => 'Primus@2026!',
-                    'role'     => $data['role'],
-                ]
-            );
+            $user = User::firstOrNew([
+                'email' => $data['email'],
+            ]);
+
+            $user->name = $data['name'];
+            $user->password = 'Primus@2026!';
+            $user->role = $data['role'];
+
+            $user->save();
         }
     }
 }
