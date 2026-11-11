@@ -1,19 +1,33 @@
 import { getCart, updateCartItem, removeCartItem } from "../api/cart.js";
+import { initNavigation } from "../components/navigation.js";
 import { formatPrice } from "../utils/format.js";
 import { $, getErrorMessage, getRecord, toast } from "../utils/dom.js";
-async function loadCart() {
-  $("#cartLoading")?.classList.remove("d-none");
-  $("#cartContent")?.classList.add("d-none");
-  $("#cartEmpty")?.classList.add("d-none");
+
+// Evita dois pedidos ao mesmo tempo (cliques rápidos no + ou no -)
+let busy = false;
+
+// firstLoad = true só na abertura da página: mostra o spinner e esconde o conteúdo.
+// Nas atualizações seguintes (mudar quantidade, remover) o conteúdo continua na tela
+// e só é trocado quando os dados novos chegam, sem piscar.
+async function loadCart(firstLoad = false) {
+  if (firstLoad) {
+    $("#cartLoading")?.classList.remove("d-none");
+    $("#cartContent")?.classList.add("d-none");
+    $("#cartEmpty")?.classList.add("d-none");
+  }
   try {
     const cart = getRecord(await getCart(), "cart"),
       items = cart.items || [];
     const list = $("#cartItems");
-    list.replaceChildren();
+    const rows = [];
+
     if (!items.length) {
+      list.replaceChildren();
+      $("#cartContent")?.classList.add("d-none");
       $("#cartEmpty")?.classList.remove("d-none");
       return;
     }
+
     items.forEach((item) => {
       const node = $("#cartItemTemplate").content.cloneNode(true),
         row = node.querySelector("[data-product-id]");
@@ -39,7 +53,9 @@ async function loadCart() {
             : "Produto indisponível ou sem estoque. Remova o item para continuar.";
         warning.classList.remove("d-none");
       }
+
       const change = async (value) => {
+        if (busy) return;
         if (value > maxStock) {
           quantity.value = maxStock;
           toast(
@@ -48,12 +64,16 @@ async function loadCart() {
           );
           return;
         }
+        busy = true;
         try {
           if (value < 1) await removeCartItem(row.dataset.productId);
           else await updateCartItem(row.dataset.productId, value);
           await loadCart();
         } catch (e) {
           toast(getErrorMessage(e, "Erro ao atualizar carrinho."), "danger");
+          await loadCart();
+        } finally {
+          busy = false;
         }
       };
       node
@@ -66,9 +86,19 @@ async function loadCart() {
       node
         .querySelector('[data-action="remove"]')
         .addEventListener("click", () => change(0));
-      list.append(node);
+      rows.push(node);
     });
+
+    // Troca a lista inteira de uma vez, só depois de montar tudo
+    list.replaceChildren(...rows);
+
+    const hasUnavailable = items.some((item) => item.available === false);
+    const checkoutLink = $("#goCheckout");
+    checkoutLink?.classList.toggle("disabled", hasUnavailable);
+    checkoutLink?.setAttribute("aria-disabled", String(hasUnavailable));
+
     $("#cartTotal").textContent = formatPrice(cart.total || 0);
+    $("#cartEmpty")?.classList.add("d-none");
     $("#cartContent")?.classList.remove("d-none");
   } catch (e) {
     toast(
@@ -79,4 +109,8 @@ async function loadCart() {
     $("#cartLoading")?.classList.add("d-none");
   }
 }
-document.addEventListener("DOMContentLoaded", loadCart);
+
+document.addEventListener("DOMContentLoaded", () => {
+  initNavigation();
+  loadCart(true);
+});

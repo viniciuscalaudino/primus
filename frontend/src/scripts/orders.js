@@ -1,6 +1,7 @@
+import { initNavigation } from "../components/navigation.js";
 import { requireAuth } from "../utils/guard.js";
 import { getOrders } from "../api/orders.js";
-import { formatPrice, formatDate } from "../utils/format.js";
+import { formatPrice, formatDate, statusLabel } from "../utils/format.js";
 import { $, unwrapList } from "../utils/dom.js";
 async function loadOrders() {
   if (!(await requireAuth())) return;
@@ -17,14 +18,19 @@ async function loadOrders() {
         const field = el.dataset.field;
         const value = {
           id: `Pedido #${order.id}`,
-          status: order.status,
+          status: statusLabel(order.status),
+          count: (order.items || []).reduce(
+            (sum, item) => sum + Number(item.quantity || 0),
+            0,
+          ),
           date: formatDate(order.created_at),
           total: formatPrice(order.total),
         }[field];
         if (value !== undefined) el.textContent = value;
       });
-      const link = root.querySelector("a");
-      if (link) link.href = `pedido.html?id=${order.id}`;
+      root.querySelector('[data-field="status"]').dataset.status = order.status;
+      // O próprio card (root) já é o <a>: querySelector("a") procura só DENTRO dele
+      root.href = `pedido.html?id=${order.id}`;
       list.append(card);
     });
   } catch (e) {
@@ -34,3 +40,5 @@ async function loadOrders() {
   }
 }
 document.addEventListener("DOMContentLoaded", loadOrders);
+
+document.addEventListener("DOMContentLoaded", initNavigation);

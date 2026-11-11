@@ -25,3 +25,8 @@ export async function logout() {
 export async function getCurrentUser() {
   return http.get("/auth/me");
 }
+
+export async function updateProfile(data) {
+  await csrfCookie();
+  return http.patch("/auth/me", data);
+}

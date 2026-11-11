@@ -1,3 +1,4 @@
+import { initNavigation } from "../components/navigation.js";
 import { requireAuth } from "../utils/guard.js";
 import { getAddresses, createAddress } from "../api/addresses.js";
 import { getCart } from "../api/cart.js";
@@ -6,10 +7,11 @@ import { formatPrice } from "../utils/format.js";
 import { $, getRecord, toast, showAlert } from "../utils/dom.js";
 let selectedAddress = null;
 let cartHasItems = false;
+let hasUnavailable = false;
 
 function syncCreateOrderButton() {
   const button = $("#placeOrderBtn");
-  if (button) button.disabled = !selectedAddress || !cartHasItems;
+  if (button) button.disabled = !selectedAddress || !cartHasItems || hasUnavailable;
 }
 const fields = [
   "recipient_name",
@@ -71,6 +73,13 @@ async function loadCheckout(preferredAddressId = selectedAddress) {
     );
     const cart = getRecord(cartResponse, "cart");
     cartHasItems = (cart.items || []).length > 0;
+    hasUnavailable = (cart.items || []).some((item) => item.available === false);
+    if (hasUnavailable) {
+      showAlert(
+        $("#checkoutAlert"),
+        "Há itens indisponíveis ou sem estoque suficiente. Volte ao carrinho e ajuste.",
+      );
+    }
     $("#checkoutItems").replaceChildren();
     (cart.items || []).forEach((item) => {
       const li = document.createElement("li");
@@ -134,3 +143,5 @@ $("#placeOrderBtn")?.addEventListener("click", async () => {
   }
 });
 document.addEventListener("DOMContentLoaded", loadCheckout);
+
+document.addEventListener("DOMContentLoaded", initNavigation);

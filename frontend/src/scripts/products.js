@@ -1,3 +1,4 @@
+import { initNavigation } from "../components/navigation.js";
 import { getProducts } from "../api/products.js";
 import { getCategories } from "../api/categories.js";
 import { formatPrice } from "../utils/format.js";
@@ -150,7 +151,7 @@ async function loadProducts(filters = currentFilters) {
     const response = await getProducts(filters);
     const products = unwrapList(response, "products");
     productGrid.replaceChildren(...products.map(renderProduct));
-    renderPagination(response.data?.links);
+    renderPagination(response.data?.meta?.links);
     document.querySelector("#resultsInfo").textContent =
       `${response.data?.meta?.total ?? products.length} produto(s)`;
     document
@@ -222,3 +223,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadProducts(currentFilters);
 });
+
+document.addEventListener("DOMContentLoaded", initNavigation);

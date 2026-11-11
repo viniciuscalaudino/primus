@@ -1,4 +1,6 @@
+import { initNavigation } from "../components/navigation.js";
 import { register } from '../api/auth.js';
+import { saveCartWarnings, redirectAfterAuth } from '../utils/guard.js';
 
 const registerForm = document.querySelector('#registerForm');
 const formAlert = document.querySelector('#formAlert');
@@ -71,14 +73,11 @@ registerForm.addEventListener('submit', async (event) => {
     spinner.classList.remove('d-none');
 
     try {
-        await register(data);
+        const response = await register(data);
 
-        formAlert.classList.remove('alert-danger');
-        formAlert.classList.add('alert-success');
-        formAlert.textContent = 'Conta criada com sucesso! Faça login para continuar.';
-        formAlert.classList.remove('d-none');
-
-        registerForm.reset();
+        // O cadastro já deixa o usuário logado e funde o carrinho de visitante.
+        saveCartWarnings(response);
+        redirectAfterAuth();
 
     } catch (error) {
         const errors = error.response?.data?.errors;
@@ -99,3 +98,5 @@ registerForm.addEventListener('submit', async (event) => {
         spinner.classList.add('d-none');
     }
 });
+
+document.addEventListener("DOMContentLoaded", initNavigation);

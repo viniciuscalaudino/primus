@@ -1,6 +1,7 @@
+import { initNavigation } from "../components/navigation.js";
 import { requireAuth } from "../utils/guard.js";
 import { getOrder, payOrder, cancelOrder } from "../api/orders.js";
-import { formatPrice, formatDate } from "../utils/format.js";
+import { formatPrice, formatDate, statusLabel } from "../utils/format.js";
 import { $, queryId, getRecord, toast, showAlert } from "../utils/dom.js";
 let order;
 async function loadOrder() {
@@ -12,9 +13,10 @@ async function loadOrder() {
   }
   try {
     order = getRecord(await getOrder(id), "order");
-    $("#orderId").textContent = `#${order.id}`;
+    $("#orderId").textContent = order.id;
     $("#orderIdCrumb").textContent = order.id;
-    $("#orderStatus").textContent = order.status;
+    $("#orderStatus").textContent = statusLabel(order.status);
+    $("#orderStatus").dataset.status = order.status;
     $("#orderDate").textContent = formatDate(order.created_at);
     $("#orderSubtotal").textContent = formatPrice(
       order.subtotal || order.total,
@@ -33,6 +35,7 @@ async function loadOrder() {
       items.append(li);
     });
     $("#orderDetail")?.classList.remove("d-none");
+    $("#payNote")?.classList.toggle("d-none", order.status !== "awaiting_payment");
     $("#payBtn").classList.toggle(
       "d-none",
       order.status !== "awaiting_payment",
@@ -71,3 +74,5 @@ $("#cancelBtn")?.addEventListener("click", async () => {
   }
 });
 document.addEventListener("DOMContentLoaded", loadOrder);
+
+document.addEventListener("DOMContentLoaded", initNavigation);

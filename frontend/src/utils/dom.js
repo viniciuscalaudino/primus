@@ -32,17 +32,33 @@ export function getValidationErrors(error) {
 }
 
 export function unwrapList(response, key) {
-  const body = response?.data ?? {};
+  const body = response?.data ?? response ?? {};
+
   if (Array.isArray(body)) return body;
   if (Array.isArray(body[key])) return body[key];
   if (Array.isArray(body.data)) return body.data;
   if (Array.isArray(body.data?.[key])) return body.data[key];
+  if (Array.isArray(body.data?.data)) return body.data.data;
+
+  const nested = body.data ?? body;
+  if (Array.isArray(nested?.[key])) return nested[key];
+
   return [];
 }
 
 export function getRecord(response, key) {
-  const body = response?.data ?? {};
-  return body[key] ?? body.data ?? body;
+  const body = response?.data ?? response ?? {};
+
+  if (key && body[key] !== undefined) return body[key];
+  if (body.data !== undefined && body.data !== body) {
+    const nested = getRecord({ data: body.data }, key);
+    if (nested !== undefined) return nested;
+  }
+
+  if (key && body.data?.[key] !== undefined) return body.data[key];
+  if (body.data !== undefined) return body.data;
+
+  return body;
 }
 
 export function toast(message, type = "success") {

@@ -1,4 +1,5 @@
-import { requireAuth } from "../utils/guard.js";
+import { initNavigation } from "../components/navigation.js";
+import { requireAdmin } from "../utils/guard.js";
 import {
   getAdminProducts,
   createProduct,
@@ -11,7 +12,7 @@ import {
   updateOrderStatus,
 } from "../api/admin.js";
 import { getCategories } from "../api/categories.js";
-import { formatPrice, formatDate } from "../utils/format.js";
+import { formatPrice, formatDate, statusLabel } from "../utils/format.js";
 import {
   $,
   unwrapList,
@@ -83,9 +84,40 @@ async function loadCategories() {
     body.append(node);
   });
 }
+let productsPage = 1;
+
+function renderProductsPagination(links) {
+  const pagination = $("#adminProductsPagination");
+  if (!pagination) return;
+  pagination.replaceChildren();
+  if (!Array.isArray(links) || links.length <= 3) return;
+  links.forEach((link) => {
+    const item = document.createElement("li");
+    item.className = `page-item${link.active ? " active" : ""}${link.url ? "" : " disabled"}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "page-link";
+    button.textContent = link.label
+      .replace("&laquo; Previous", "‹")
+      .replace("Next &raquo;", "›");
+    button.disabled = !link.url || link.active;
+    if (link.url && !link.active) {
+      const page = new URL(link.url, location.origin).searchParams.get("page");
+      button.addEventListener("click", async () => {
+        productsPage = Number(page);
+        await loadProducts();
+      });
+    }
+    item.append(button);
+    pagination.append(item);
+  });
+}
+
 async function loadProducts() {
-  const products = unwrapList(await getAdminProducts(), "products"),
+  const productsResponse = await getAdminProducts({ page: productsPage });
+  const products = unwrapList(productsResponse, "products"),
     body = $("#adminProductsBody");
+  renderProductsPagination(productsResponse.data?.meta?.links);
   body.replaceChildren();
   products.forEach((product) => {
     const node = $("#adminProductRowTemplate").content.cloneNode(true),
@@ -140,7 +172,9 @@ async function loadOrders() {
     row.querySelector('[data-field="total"]').textContent = formatPrice(
       order.total,
     );
-    row.querySelector('[data-field="status"]').textContent = order.status;
+    const orderStatus = row.querySelector('[data-field="status"]');
+    orderStatus.textContent = statusLabel(order.status);
+    orderStatus.dataset.status = order.status;
     const ship = row.querySelector('[data-action="ship"]'),
       deliver = row.querySelector('[data-action="deliver"]');
     if (order.status === "paid") {
@@ -295,6 +329,8 @@ async function transition(id, status) {
 }
 $("#orderStatusFilter")?.addEventListener("change", loadOrders);
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!(await requireAuth())) return;
+  if (!(await requireAdmin())) return;
   await refreshAll();
 });
+
+document.addEventListener("DOMContentLoaded", initNavigation);

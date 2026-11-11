@@ -1,3 +1,4 @@
+import { initNavigation } from "../components/navigation.js";
 import { getProduct } from "../api/products.js";
 import { addToCart, getCart } from "../api/cart.js";
 import { formatPrice } from "../utils/format.js";
@@ -104,3 +105,5 @@ $("#addToCartBtn")?.addEventListener("click", async () => {
   }
 });
 document.addEventListener("DOMContentLoaded", loadProduct);
+
+document.addEventListener("DOMContentLoaded", initNavigation);

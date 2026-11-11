@@ -14,6 +14,10 @@ RUN npm install
 # Copia o restante dos arquivos do front-end
 COPY . .
 
+# URL da API usada pelo front (padrão: mesma origem, o proxy encaminha /api)
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Gera a versão de produção da aplicação
 RUN npm run build
 

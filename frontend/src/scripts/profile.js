@@ -1,5 +1,5 @@
 import { requireAuth } from "../utils/guard.js";
-import { getCurrentUser } from "../api/auth.js";
+import { getCurrentUser, updateProfile } from "../api/auth.js";
 import { initNavigation } from "../components/navigation.js";
 import {
   getAddresses,
@@ -22,8 +22,8 @@ async function loadProfile() {
   if (!(await requireAuth())) return;
   try {
     const user = getRecord(await getCurrentUser(), "user");
-    $("#profileName").textContent = user.name;
-    $("#profileEmail").textContent = user.email;
+    $("#profileName").value = user.name;
+    $("#profileEmail").value = user.email;
     const addresses = unwrapList(await getAddresses(), "addresses"),
       list = $("#addressList");
     list.replaceChildren();
@@ -88,3 +88,34 @@ $("#addressForm")?.addEventListener("submit", async (e) => {
   }
 });
 document.addEventListener("DOMContentLoaded", loadProfile);
+
+$("#profileForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  document
+    .querySelectorAll("#profileForm .is-invalid")
+    .forEach((el) => el.classList.remove("is-invalid"));
+  document
+    .querySelectorAll("#profileForm [data-error-for]")
+    .forEach((el) => (el.textContent = ""));
+  $("#profileAlert")?.classList.add("d-none");
+  try {
+    await updateProfile({
+      name: $("#profileName").value.trim(),
+      email: $("#profileEmail").value.trim(),
+    });
+    toast("Dados atualizados.");
+    await initNavigation();
+  } catch (error) {
+    const errors = error.response?.data?.errors;
+    if (errors) {
+      Object.entries(errors).forEach(([field, messages]) => {
+        const input = document.querySelector(`#profileForm [name="${field}"]`);
+        const feedback = document.querySelector(`#profileForm [data-error-for="${field}"]`);
+        input?.classList.add("is-invalid");
+        if (feedback) feedback.textContent = messages[0];
+      });
+    } else {
+      showAlert($("#profileAlert"), error.response?.data?.message || "Não foi possível salvar.");
+    }
+  }
+});

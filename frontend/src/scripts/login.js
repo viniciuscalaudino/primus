@@ -1,4 +1,6 @@
+import { initNavigation } from "../components/navigation.js";
 import { login } from '../api/auth.js';
+import { saveCartWarnings, redirectAfterAuth } from '../utils/guard.js';
 
 const loginForm = document.querySelector('#loginForm');
 const formAlert = document.querySelector('#formAlert');
@@ -59,9 +61,10 @@ loginForm.addEventListener('submit', async (event) => {
     spinner.classList.remove('d-none');
 
     try {
-        await login(credentials);
+        const response = await login(credentials);
 
-        window.location.href = './index.html';
+        saveCartWarnings(response);
+        redirectAfterAuth();
 
     } catch (error) {
         const errors = error.response?.data?.errors;
@@ -82,3 +85,5 @@ loginForm.addEventListener('submit', async (event) => {
         spinner.classList.add('d-none');
     }
 });
+
+document.addEventListener("DOMContentLoaded", initNavigation);

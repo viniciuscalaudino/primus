@@ -1,8 +1,19 @@
 import { getCurrentUser, logout } from "../api/auth.js";
 import { getCart } from "../api/cart.js";
-import { getRecord } from "../utils/dom.js";
+import { getRecord, toast } from "../utils/dom.js";
+import { takeCartWarnings } from "../utils/guard.js";
+
+let navigationReady = false;
 
 export async function initNavigation() {
+  if (navigationReady) return;
+  navigationReady = true;
+
+  // Avisos da fusão do carrinho (ajustes de quantidade, itens indisponíveis)
+  takeCartWarnings().forEach((warning) =>
+    toast(warning.message || String(warning), "warning"),
+  );
+
   const accountLink = document.querySelector("#accountLink");
   const logoutBtn = document.querySelector("#logoutBtn");
   const profileLogout = document.querySelector("#profileLogout");

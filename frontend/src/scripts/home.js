@@ -1,3 +1,4 @@
+import { initNavigation } from "../components/navigation.js";
 import { getProducts } from "../api/products.js";
 import { getCategories } from "../api/categories.js";
 import { addToCart, getCart } from "../api/cart.js";
@@ -32,15 +33,45 @@ async function loadHome() {
     const productList = document.querySelector("#novidadesList");
     if (categoryList) {
       categoryList.replaceChildren();
-      categories.slice(0, 4).forEach((category) => {
+      const categoryStyles = [
+        { match: /prote[ií]na/i, theme: "protein", icon: "bi-person-arms-up" },
+        { match: /creatina|amino/i, theme: "amino", icon: "bi-lightning-charge" },
+        { match: /pr[eé].?treino|energia/i, theme: "energy", icon: "bi-lightning-charge-fill" },
+        { match: /acess[oó]rio/i, theme: "accessory", icon: "bi-bag" },
+      ];
+      categories.slice(0, 4).forEach((category, index) => {
         const col = document.createElement("div");
         col.className = "col";
         const link = document.createElement("a");
-        link.className = "cat-card";
+        const style = categoryStyles.find(({ match }) =>
+          match.test(category.name),
+        );
+        link.className = `cat-card${style ? ` cat-card--${style.theme}` : ""}`;
         link.href = `products.html?category=${encodeURIComponent(category.id)}`;
-        const title = document.createElement("span");
+        const image = document.createElement("div");
+        image.className = "cat-img";
+        const number = document.createElement("span");
+        number.className = "cat-index";
+        number.textContent = String(index + 1).padStart(2, "0");
+        const icon = document.createElement("i");
+        icon.className = `cat-icon bi ${style?.icon || "bi-grid"}`;
+        icon.setAttribute("aria-hidden", "true");
+        image.append(number, icon);
+
+        const info = document.createElement("div");
+        info.className = "cat-info";
+        const title = document.createElement("strong");
         title.textContent = category.name;
-        link.append(title);
+        const action = document.createElement("span");
+        action.className = "cat-action";
+        action.append(
+          document.createTextNode("Explorar coleção"),
+          Object.assign(document.createElement("i"), {
+            className: "bi bi-arrow-up-right",
+          }),
+        );
+        info.append(title, action);
+        link.append(image, info);
         col.append(link);
         categoryList.append(col);
       });
@@ -122,3 +153,5 @@ async function loadHome() {
   }
 }
 document.addEventListener("DOMContentLoaded", loadHome);
+
+document.addEventListener("DOMContentLoaded", initNavigation);

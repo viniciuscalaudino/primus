@@ -11,3 +11,15 @@ export function formatDate(value) {
 }
 
 
+
+const STATUS_LABELS = {
+    awaiting_payment: 'Aguardando pagamento',
+    paid: 'Pago',
+    shipped: 'Enviado',
+    delivered: 'Entregue',
+    cancelled: 'Cancelado',
+};
+
+export function statusLabel(status) {
+    return STATUS_LABELS[status] || status;
+}
